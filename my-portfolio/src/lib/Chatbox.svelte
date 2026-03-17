@@ -7,31 +7,41 @@
   const myAvatar = ""; // your avatar URL
 
   // Conversation "script": each step has a bot message + reply options
-  const script = [
-    {
-      bot: "hey!! so glad you're here 🐻",
-      options: ["hey!! same 🥺", "omg hi hi hi"]
+  const script = {
+    step0: {
+      bot: "hey!! so glad you're here :3",
+      options: [
+        {label: "hey!! same ", next: "step1"},
+        {label: "omg hii", next: "step1"}
+      ]
     },
-    {
+    step1: {
       bot: "i'm simone! i'm currently a junior at ucf studying computer science :3 my main focus is full stack development and my dream job is to be a SWE at pinterest 📌 i currently work as a contract software engineer at lockheed martin, and outside of classes and work i'm a workshop director for ucf's girl's who code loop! \n if you want to read more about me, click the hamburger bar in the top right!",
-      options: ["can i see your resume?", "cool! just wanted to say hi"]
+      options: [
+        {label: "can i see your resume?", next: "resume"},
+        {label: "cool! just wanted to say hi", next: "justHi"}
+      ]
     },
-    {
-      bot: "that's so cute honestly 🍓 i've been listening to music all day",
-      options: ["same honestly", "ooh what have you been listening to?", "send me a playlist!!"]
+    resume: {
+      bot: "of course! click here to view it :)",
+      options: [
+        {label: "thanks!", next: "end"}
+      ]
     },
-    {
+    justHi: {
       bot: "ok i have to go but let's talk soon 💕",
-      options: ["yes please!", "already missing u 🥲", "byeee 💗"]
+      options: [
+        {label: "yes please!", next: "byeee 💗"}
+      ]
     },
-    {
+    end: {
       bot: "💌",
       options: null // end of conversation
     }
-  ];
+  };
 
   let messages = [];
-  let currentStep = 0;
+  let currentStep = 'step0';
   let waitingForReply = false;
 
   function getTime() {
@@ -44,29 +54,27 @@
   }
 
   async function startChat() {
-    if (currentStep < script.length) {
-      await addBotMessage(script[currentStep].bot);
-    }
+    await addBotMessage(script[currentStep].bot);
   }
 
   async function addBotMessage(text) {
     waitingForReply = true;
     await tick();
     // simulate typing delay
-    await delay(600);
+    await delay(800);
     messages = [...messages, { from: 'bot', text, time: getTime() }];
     await tick();
     scrollToBottom();
   }
 
   async function choose(option) {
-    if (waitingForReply === false) return;
+    if (!waitingForReply) return;
     waitingForReply = false;
-    messages = [...messages, { from: 'me', text: option, time: getTime() }];
+    messages = [...messages, { from: 'me', text: option.label, time: getTime() }];
     await tick();
     scrollToBottom();
-    currentStep++;
-    if (currentStep < script.length) {
+    currentStep = option.next; // jump to the named step
+    if (script[currentStep]) {
       await addBotMessage(script[currentStep].bot);
     }
   }
@@ -120,7 +128,10 @@
   import { onMount } from 'svelte';
   onMount(() => startChat());
 
-  $: currentOptions = waitingForReply && currentStep < script.length ? script[currentStep].options : null;
+
+  $: currentOptions = waitingForReply && script[currentStep]
+    ? script[currentStep].options
+    : null;
 </script>
 
 <div class="wrapper">
@@ -206,10 +217,10 @@
     {#if currentOptions}
       <div class="options">
         {#each currentOptions as opt}
-          <button class="option-btn" on:click={() => choose(opt)}>{opt}</button>
+          <button class="option-btn" on:click={() => choose(opt)}>{opt.label}</button>
         {/each}
       </div>
-    {:else if !waitingForReply && currentStep >= script.length}
+    {:else if !waitingForReply && !script[currentStep]?.options}
       <div class="options end-msg">conversation ended 💌</div>
     {/if}
 
