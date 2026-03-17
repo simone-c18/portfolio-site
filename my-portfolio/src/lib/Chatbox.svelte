@@ -1,42 +1,44 @@
 <script>
-  import { tick } from 'svelte';
+  import { tick, onMount } from 'svelte';
 
   // --- CONFIG ---
   const contactName = "simone chrastek";
-  const contactAvatar = "./headshot.jpeg"; // put an image URL here, or leave empty for initials
-  const myAvatar = ""; // your avatar URL
+  const contactAvatar = "./headshot.jpeg";
+  const myAvatar = "";
 
-  // Conversation "script": each step has a bot message + reply options
   const script = {
     step0: {
       bot: "hey!! so glad you're here :3",
       options: [
-        {label: "hey!! same ", next: "step1"},
-        {label: "omg hii", next: "step1"}
+        { label: "hey!! same ", next: "step1" },
+        { label: "omg hii", next: "step1" }
       ]
     },
     step1: {
       bot: "i'm simone! i'm currently a junior at ucf studying computer science :3 my main focus is full stack development and my dream job is to be a SWE at pinterest 📌 i currently work as a contract software engineer at lockheed martin, and outside of classes and work i'm a workshop director for ucf's girl's who code loop! \n if you want to read more about me, click the hamburger bar in the top right!",
       options: [
-        {label: "can i see your resume?", next: "resume"},
-        {label: "cool! just wanted to say hi", next: "justHi"}
+        { label: "can i see your resume?", next: "resume" },
+        { label: "cool! just wanted to say hi", next: "justHi" }
       ]
     },
     resume: {
       bot: "of course! click here to view it :)",
+      link: { text: "here", href: "/resume.pdf" },
       options: [
-        {label: "thanks!", next: "end"}
+        { label: "thanks!", next: "end" }
       ]
     },
     justHi: {
       bot: "ok i have to go but let's talk soon 💕",
       options: [
-        {label: "yes please!", next: "byeee 💗"}
+        { label: "yes please!", next: "end" },
+        { label: "already missing u 🥲", next: "end" },
+        { label: "byeee 💗", next: "end" }
       ]
     },
     end: {
       bot: "💌",
-      options: null // end of conversation
+      options: null
     }
   };
 
@@ -54,15 +56,14 @@
   }
 
   async function startChat() {
-    await addBotMessage(script[currentStep].bot);
+    await addBotMessage(script[currentStep].bot, script[currentStep].link ?? null);
   }
 
-  async function addBotMessage(text) {
+  async function addBotMessage(text, link = null) {
     waitingForReply = true;
     await tick();
-    // simulate typing delay
     await delay(800);
-    messages = [...messages, { from: 'bot', text, time: getTime() }];
+    messages = [...messages, { from: 'bot', text, link, time: getTime() }];
     await tick();
     scrollToBottom();
   }
@@ -73,9 +74,9 @@
     messages = [...messages, { from: 'me', text: option.label, time: getTime() }];
     await tick();
     scrollToBottom();
-    currentStep = option.next; // jump to the named step
+    currentStep = option.next;
     if (script[currentStep]) {
-      await addBotMessage(script[currentStep].bot);
+      await addBotMessage(script[currentStep].bot, script[currentStep].link ?? null);
     }
   }
 
@@ -122,12 +123,7 @@
   function openPage(page) { activePage = page; }
   function closePopup() { activePage = null; menuOpen = false; }
 
-
-
-  // Start conversation on mount
-  import { onMount } from 'svelte';
   onMount(() => startChat());
-
 
   $: currentOptions = waitingForReply && script[currentStep]
     ? script[currentStep].options
@@ -139,7 +135,6 @@
 
     <!-- Header -->
     <div class="header">
-      
       <div class="room-name">simone's chat room</div>
       <button class="menu-btn" aria-label="menu" on:click={toggleMenu}>☰</button>
     </div>
@@ -193,7 +188,13 @@
               {/if}
             </div>
           {/if}
-          <div class="bubble {msg.from}">{msg.text}</div>
+          <div class="bubble {msg.from}">
+            {#if msg.link}
+              {msg.text.split(msg.link.text)[0]}<a href={msg.link.href} target="_blank" rel="noopener">{msg.link.text}</a>{msg.text.split(msg.link.text)[1]}
+            {:else}
+              {msg.text}
+            {/if}
+          </div>
           {#if msg.from === 'me'}
             <div class="msg-avatar my-avatar">
               {#if myAvatar}
@@ -264,24 +265,6 @@
     gap: 12px;
     position: relative;
   }
-
-  .avatar-top {
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    overflow: hidden;
-    border: 2px solid white;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: white;
-    font-size: 22px;
-    position: absolute;
-    top: -10px;
-    left: 50%;
-    transform: translateX(-50%);
-  }
-  .avatar-top img { width: 100%; height: 100%; object-fit: cover; }
 
   .room-name {
     flex: 1;
@@ -400,6 +383,13 @@
     color: #444;
     border-bottom-right-radius: 6px;
   }
+
+  .bubble a {
+    color: #c46ea0;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+  .bubble a:hover { color: #a0507e; }
 
   @keyframes pop {
     from { opacity: 0; transform: scale(0.92) translateY(4px); }
