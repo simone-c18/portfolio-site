@@ -13,8 +13,8 @@
       options: ["hey!! same 🥺", "omg hi hi hi"]
     },
     {
-      bot: "what's up? anything fun happening today?",
-      options: ["not much, just chilling", "actually yes!! wanna hear?", "nope, just wanted to say hi"]
+      bot: "i'm simone! i'm currently a junior at ucf studying computer science :3 my main focus is full stack development and my dream job is to be a SWE at pinterest 📌 i currently work as a contract software engineer at lockheed martin, and outside of classes and work i'm a workshop director for ucf's girl's who code loop! \n if you want to read more about me, click the hamburger bar in the top right!",
+      options: ["can i see your resume?", "cool! just wanted to say hi"]
     },
     {
       bot: "that's so cute honestly 🍓 i've been listening to music all day",
@@ -80,6 +80,42 @@
     return new Promise(r => setTimeout(r, ms));
   }
 
+  const pages = [
+    {
+      id: 'experience',
+      label: '💼 experience',
+      content: `find me elsewhere:\n— instagram: @simone\n— letterboxd: simone\n— spotify: simone\n— pinterest: simone`
+    },
+    {
+      id: 'projects',
+      label: '🔌 projects',
+      content: `find me elsewhere:\n— instagram: @simone\n— letterboxd: simone\n— spotify: simone\n— pinterest: simone`
+    },
+    {
+      id: 'skills',
+      label: '🛠️ skills',
+      content: `languages:\n c/c++, python, java, javascript/typescript, html, css, sql \nframeworks/libraries:\n node.js, react, express, tailwindcss, svelte, mongodb \n tools:\n git/github, visual studio code, figma, eclipse, docker, postman, virtualbox, jira, trello \n operating systems:\n windows, linux, macos`
+    },
+    {
+      id: 'links',
+      label: '🔗 links',
+      html: `reach out to me here!<br><br>
+    — email: <a href="mailto:simone.chrastek5@gmail.com">simone.chrastek5@gmail.com</a><br>
+    — linkedin: <a href="https://linkedin.com/in/simone-chrastek" target="_blank" rel="noopener">simone-chrastek</a><br>
+    — github: <a href="https://github.com/yourhandle" target="_blank" rel="noopener">yourhandle</a><br>
+    — resume: <a href="/resume.pdf" target="_blank" rel="noopener">view ↗</a>`
+    }
+  ];
+
+  let menuOpen = false;
+  let activePage = null;
+
+  function toggleMenu() { menuOpen = !menuOpen; activePage = null; }
+  function openPage(page) { activePage = page; }
+  function closePopup() { activePage = null; menuOpen = false; }
+
+
+
   // Start conversation on mount
   import { onMount } from 'svelte';
   onMount(() => startChat());
@@ -92,16 +128,30 @@
 
     <!-- Header -->
     <div class="header">
-      <div class="avatar-top">
-        {#if myAvatar}
-          <img src={myAvatar} alt="me" />
-        {:else}
-          <span>🐻</span>
-        {/if}
-      </div>
+      
       <div class="room-name">simone's chat room</div>
-      <button class="menu-btn" aria-label="menu">☰</button>
+      <button class="menu-btn" aria-label="menu" on:click={toggleMenu}>☰</button>
     </div>
+
+    <!-- Dropdown menu -->
+    {#if menuOpen && !activePage}
+      <div class="menu-dropdown">
+        {#each pages as page}
+          <button class="menu-item" on:click={() => openPage(page)}>{page.label}</button>
+        {/each}
+      </div>
+    {/if}
+
+    <!-- Page popup -->
+    {#if activePage}
+      <div class="popup-overlay" on:click={closePopup}>
+        <div class="popup" on:click|stopPropagation>
+          <button class="popup-close" on:click={closePopup}>✕</button>
+          <h2 class="popup-title">{activePage.label}</h2>
+          <p class="popup-content">{activePage.content}</p>
+        </div>
+      </div>
+    {/if}
 
     <!-- Contact bar -->
     <div class="contact-bar">
@@ -191,6 +241,7 @@
     flex-direction: column;
     min-height: 520px;
     max-height: 90vh;
+    position: relative;
   }
 
   /* Header */
@@ -406,5 +457,92 @@
     text-align: center;
     justify-content: center;
     padding-bottom: 24px;
+  }
+
+  /* Menu dropdown */
+  .menu-dropdown {
+    position: absolute;
+    top: 58px;
+    right: 16px;
+    background: white;
+    border: 1.5px solid #f0c6e4;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+    z-index: 100;
+    min-width: 180px;
+    animation: pop 0.15s ease;
+  }
+
+  .menu-item {
+    display: block;
+    width: 100%;
+    padding: 12px 18px;
+    text-align: left;
+    background: none;
+    border: none;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    color: #555;
+    cursor: pointer;
+    transition: background 0.1s;
+  }
+  .menu-item:hover { background: #fce4f3; }
+  .menu-item + .menu-item { border-top: 1px solid #f5e0ef; }
+
+  /* Popup overlay */
+  .popup-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(240, 220, 235, 0.55);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 200;
+    border-radius: 22px;
+    animation: fadein 0.2s ease;
+  }
+
+  @keyframes fadein {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  .popup {
+    background: white;
+    border: 1.5px solid #f0c6e4;
+    border-radius: 18px;
+    padding: 28px 28px 24px;
+    width: min(360px, 85%);
+    position: relative;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+    animation: pop 0.2s ease;
+  }
+
+  .popup-close {
+    position: absolute;
+    top: 14px;
+    right: 16px;
+    background: none;
+    border: none;
+    font-size: 16px;
+    color: #bbb;
+    cursor: pointer;
+  }
+  .popup-close:hover { color: #888; }
+
+  .popup-title {
+    font-size: 16px;
+    font-weight: 500;
+    color: #444;
+    margin-bottom: 14px;
+  }
+
+  .popup-content {
+    font-size: 14px;
+    color: #666;
+    line-height: 1.7;
+    white-space: pre-line;
   }
 </style>
