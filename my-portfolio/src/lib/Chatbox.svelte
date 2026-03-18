@@ -10,39 +10,65 @@
     step0: {
       bot: "hey!! so glad you're here :3",
       options: [
-        { label: "hey!! same ", next: "step1" },
+        { label: "hey!! same", next: "step1" },
         { label: "omg hii", next: "step1" }
       ]
     },
     step1: {
-      bot: "i'm simone! i'm currently a junior at ucf studying computer science :3 my main focus is full stack development and my dream job is to be a SWE at pinterest 📌 i currently work as a contract software engineer at lockheed martin, and outside of classes and work i'm a workshop director for ucf's girl's who code loop! \n if you want to read more about me, click the hamburger bar in the top right!",
+      bot: "i'm simone! i'm currently a junior at ucf studying computer science :3 i'm an aspiring full stack developer and my dream job is to be a SWE at pinterest 📌 i currently work as a contract software engineer at lockheed martin, and outside of classes and work i'm a workshop director for ucf's girl's who code loop! \n if you want to read more about me, click the hamburger bar in the top right!",
       options: [
         { label: "can i see your resume?", next: "resume" },
-        { label: "cool! just wanted to say hi", next: "justHi" }
+        { label: "cool! i'm gonna look around a bit..", next: "step2" }
+      ]
+    },
+    step2: {
+      bot: "is there anything else you want to chat about?",
+      options: [
+        { label: "what's your favorite project that you've worked on?", next: "project" },
+        { label: "why do you enjoy fullstack development?", next: "enjoy" },
+        { label: "what type of music are you into?", next: "music" },
+        { label: "i gtg", next: "end" }
+      ]
+    },
+    enjoy: {
+      bot: "my favorite thing about fullstack dev is that it allows for me to be versatile in what i'm working on! i can work on either frontend or backend and have the overall ability to build something end-to-end. i think it's also fascinating to understand how an application works in its entirety -- how each component interacts with one another to mend into one, cohesive product. the overall process of building a full scale project is always daunting, but rewarding :)",
+      options: [
+        { label: "awesome!", next: "step2" },
+      ]
+    },
+    project: {
+      bot: "i'm currently head of ucf's girls who code web dev team, where we are building the club's website! although it isn't my most technically challenging project, i'm quite happy to have the opportunity to contribute back to a club that has helped me in so many ways! i designed the entire figma for the site, and i'm able to work with members of the club and use a modern frontend stack to create the site (which btw was long overdue!!)",
+      options: [
+        { label: "wow! that sounds pretty cool :3", next: "step2" },
+        { label: "girls who code is so epic!!", next: "step2" }
+      ]
+    },
+    music: {
+      messages: [
+        "my music taste is allll over the place, so it's hard to pinpoint a specific genre.. but here's a list of some artists i listen to a lot!",
+        "jeff buckley, fka twigs, adela, old p!atd, rehash, pierce the veil, and deftones!"
+      ],
+      options: [
+        { label: "your music taste is elite", next: "step2" },
+        { label: "i don't know any of those artists..", next: "step2"}
       ]
     },
     resume: {
       bot: "of course! click here to view it :)",
       link: { text: "here", href: "/resume.pdf" },
       options: [
-        { label: "thanks!", next: "end" }
-      ]
-    },
-    justHi: {
-      bot: "ok i have to go but let's talk soon 💕",
-      options: [
-        { label: "yes please!", next: "end" },
-        { label: "already missing u 🥲", next: "end" },
-        { label: "byeee 💗", next: "end" }
+        { label: "thanks!", next: "step2" }
       ]
     },
     end: {
-      bot: "💌",
+      bot: "aw, it was fun to talking with you! reach out to me via linkedin or email if you'd like to keep the convo going :3",
+      link: { text: "linkedin", href: "https://www.linkedin.com/in/simone-chrastek/" },
       options: null
     }
   };
 
   let messages = [];
+  let isTyping = false;
   let currentStep = 'step0';
   let waitingForReply = false;
 
@@ -56,16 +82,24 @@
   }
 
   async function startChat() {
-    await addBotMessage(script[currentStep].bot, script[currentStep].link ?? null);
+    await addBotMessage(script[currentStep]);
   }
 
-  async function addBotMessage(text, link = null) {
+  async function addBotMessage(step) {
     waitingForReply = true;
+    isTyping = true;
     await tick();
-    await delay(800);
-    messages = [...messages, { from: 'bot', text, link, time: getTime() }];
-    await tick();
-    scrollToBottom();
+
+    const texts = step.messages ?? [step.bot];
+
+    for (const text of texts) {
+      await delay(800);
+      messages = [...messages, { from: 'bot', text, link: step.link ?? null, time: getTime() }];
+      await tick();
+      scrollToBottom();
+    }
+
+    isTyping = false;
   }
 
   async function choose(option) {
@@ -76,8 +110,9 @@
     scrollToBottom();
     currentStep = option.next;
     if (script[currentStep]) {
-      await addBotMessage(script[currentStep].bot, script[currentStep].link ?? null);
+      await addBotMessage(script[currentStep]);
     }
+    scrollToBottom();
   }
 
   function scrollToBottom() {
@@ -93,26 +128,42 @@
     {
       id: 'experience',
       label: '💼 experience',
-      content: `find me elsewhere:\n— instagram: @simone\n— letterboxd: simone\n— spotify: simone\n— pinterest: simone`
+      sections: [
+        { heading: 'contract software engineer', items: 'contract software engineer — present' },
+        { heading: 'workshop director', items: 'workshop director — present' },
+        { heading: 'college mentor', items: 'girls who code' },
+      ]
     },
     {
       id: 'projects',
       label: '🔌 projects',
-      content: `find me elsewhere:\n— instagram: @simone\n— letterboxd: simone\n— spotify: simone\n— pinterest: simone`
+      sections: [
+        { heading: 'girls who code website', href: 'https://github.com/simone-c18/GWC_WebDev', items: 'designed figma & leading web dev team to build club website using node.js + tailwind' },
+        { heading: 'ecosorter', items: 'developed REST api endpoints using express for user auth and data retrieval', href: 'https://github.com/mariamauco/Fall2025WEECSLarge' },
+        { heading: 'mealminder', items: 'ai powered ingredient tracker + recipe generator; developed UI using react + tailwind ', href: 'https://github.com/izzyaustt/MealMinder' },
+        { heading: 'codecade', items: 'competed in knighthacks project showcase; built and designed UI + implemented JS logic handling', href: 'https://github.com/Kat-Gumerov/LearningBehindTheScreens' },
+        { heading: 'intro to love', items: 'competed in gwc projects showcase; acted as PM to build interactive game to learn different coding languages using node.js + react', href: 'https://github.com/simone-c18/gwc-group-9' },
+      ]
     },
     {
       id: 'skills',
       label: '🛠️ skills',
-      content: `languages:\n c/c++, python, java, javascript/typescript, html, css, sql \nframeworks/libraries:\n node.js, react, express, tailwindcss, svelte, mongodb \n tools:\n git/github, visual studio code, figma, eclipse, docker, postman, virtualbox, jira, trello \n operating systems:\n windows, linux, macos`
+      sections: [
+        { heading: 'languages', items: 'c/c++, python, java, javascript/typescript, html, css, sql' },
+        { heading: 'frameworks/libraries', items: 'node.js, react, express, tailwindcss, svelte, mongodb' },
+        { heading: 'tools', items: 'git/github, visual studio code, figma, eclipse, docker, postman, virtualbox, jira, trello' },
+        { heading: 'operating systems', items: 'windows, linux, macos' }
+      ]
     },
     {
       id: 'links',
       label: '🔗 links',
-      html: `reach out to me here!<br><br>
-    — email: <a href="mailto:simone.chrastek5@gmail.com">simone.chrastek5@gmail.com</a><br>
-    — linkedin: <a href="https://linkedin.com/in/simone-chrastek" target="_blank" rel="noopener">simone-chrastek</a><br>
-    — github: <a href="https://github.com/yourhandle" target="_blank" rel="noopener">yourhandle</a><br>
-    — resume: <a href="/resume.pdf" target="_blank" rel="noopener">view ↗</a>`
+      sections: [
+        { heading: 'email', items: 'simone.chrastek5@gmail.com', itemHref: 'mailto:simone.chrastek5@gmail.com' },
+        { heading: 'linkedin', items: 'linkedin.com/in/simone-chrastek', itemHref: 'https://linkedin.com/in/simone-chrastek' },
+        { heading: 'github', items: 'github.com/simone-c18', itemHref: 'https://github.com/simone-c18' },
+        { heading: 'resume', items: 'view/download ↗', itemHref: '/resume.pdf' }
+      ]
     }
   ];
 
@@ -125,7 +176,7 @@
 
   onMount(() => startChat());
 
-  $: currentOptions = waitingForReply && script[currentStep]
+  $: currentOptions = waitingForReply && !isTyping && script[currentStep]
     ? script[currentStep].options
     : null;
 </script>
@@ -150,11 +201,28 @@
 
     <!-- Page popup -->
     {#if activePage}
-      <div class="popup-overlay" on:click={closePopup}>
-        <div class="popup" on:click|stopPropagation>
+      <div class="popup-overlay" role="dialog" aria-modal="true" on:click={closePopup} on:keydown={closePopup}>
+        <div class="popup" role="presentation" on:click|stopPropagation on:keydown|stopPropagation>
           <button class="popup-close" on:click={closePopup}>✕</button>
           <h2 class="popup-title">{activePage.label}</h2>
-          <p class="popup-content">{activePage.content}</p>
+          {#each activePage.sections as section}
+            <div class="popup-section">
+              <span class="popup-heading">
+                {#if section.href}
+                  <a href={section.href} target="_blank" rel="noopener">{section.heading}</a>
+                {:else}
+                  {section.heading}
+                {/if}
+              </span>
+              <p class="popup-items">
+                {#if section.itemHref}
+                  <a href={section.itemHref} target="_blank" rel="noopener">{section.items}</a>
+                {:else}
+                  {section.items}
+                {/if}
+              </p>
+            </div>
+          {/each}
         </div>
       </div>
     {/if}
@@ -229,7 +297,7 @@
 </div>
 
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&display=swap');
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -512,10 +580,13 @@
 
   .popup {
     background: white;
+    color: #444;
     border: 1.5px solid #f0c6e4;
     border-radius: 18px;
     padding: 28px 28px 24px;
     width: min(360px, 85%);
+    max-height: 75vh;
+    overflow-y: auto;
     position: relative;
     box-shadow: 0 10px 40px rgba(0,0,0,0.1);
     animation: pop 0.2s ease;
@@ -540,10 +611,80 @@
     margin-bottom: 14px;
   }
 
-  .popup-content {
-    font-size: 14px;
-    color: #666;
-    line-height: 1.7;
-    white-space: pre-line;
+  .popup-section {
+    margin-bottom: 16px;
   }
+  .popup-section:last-child {
+    margin-bottom: 0;
+  }
+  .popup-heading {
+    display: block;
+    font-weight: 600;
+    font-size: 14px;
+    color: #444;
+    margin-bottom: 4px;
+    letter-spacing: 0.01em;
+  }
+  .popup-heading a {
+    color: #444;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    font-weight: 600;
+  }
+  .popup-heading a:hover { color: #b06090; }
+  .popup-items {
+    font-size: 13.5px;
+    color: #888;
+    line-height: 1.6;
+  }
+  .popup-items a {
+    color: #c46ea0;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+  .popup-items a:hover { color: #a0507e; }
+
+  /* Mobile */
+@media (max-width: 600px) {
+  .wrapper {
+    padding: 0;
+    align-items: flex-end;
+  }
+
+  .chatbox {
+    border-radius: 22px 22px 0 0;
+    min-height: 100svh;
+    max-height: 100svh;
+    width: 100%;
+  }
+
+  .bubble {
+    max-width: 75%;
+  }
+
+  .option-btn {
+    min-width: 160px;
+    font-size: 13px;
+    padding: 9px 16px;
+  }
+
+  .popup {
+    width: 90%;
+    max-height: 70vh;
+    padding: 22px 20px 20px;
+  }
+
+  .contact-bar {
+    margin: 10px 10px 0;
+  }
+
+  .messages {
+    padding: 14px 14px 10px;
+  }
+
+  .options {
+    padding: 10px 14px 16px;
+  }
+}
+
 </style>
