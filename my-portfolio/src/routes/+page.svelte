@@ -26,7 +26,7 @@
     <div class="landing">
         <div class="card">
             <p class="declined-msg">maybe another time 🌸</p>
-            <button class="btn-accept small" on:click={enterChat}>actually, let's chat</button>
+            <button class="btn-accept small" on:click={enterChat}>actually, let's chat!</button>
         </div>
     </div>
 

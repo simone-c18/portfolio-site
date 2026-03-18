@@ -25,7 +25,8 @@
       bot: "is there anything else you want to chat about?",
       options: [
         { label: "what's your favorite project that you've worked on?", next: "project" },
-        { label: "why do you enjoy fullstack development?", next: "enjoy" },
+        { label: "why do you enjoy fullstack development?", next: "enjoy" }, 
+        { label: "can i see your resume?", next: "resume" },
         { label: "what type of music are you into?", next: "music" },
         { label: "i gtg", next: "end" }
       ]
@@ -55,7 +56,7 @@
     },
     resume: {
       bot: "of course! click here to view it :)",
-      link: { text: "here", href: "/resume.pdf" },
+      link: { text: "here", href: '/resume.pdf' },
       options: [
         { label: "thanks!", next: "step2" }
       ]
@@ -93,7 +94,7 @@
     const texts = step.messages ?? [step.bot];
 
     for (const text of texts) {
-      await delay(800);
+      await delay(1500);
       messages = [...messages, { from: 'bot', text, link: step.link ?? null, time: getTime() }];
       await tick();
       scrollToBottom();
@@ -275,7 +276,7 @@
         </div>
       {/each}
 
-      {#if waitingForReply && messages.length === 0}
+      {#if isTyping}
         <div class="typing-row">
           <div class="typing-dots"><span></span><span></span><span></span></div>
         </div>
@@ -319,7 +320,7 @@
     box-shadow: 0 30px 80px rgba(0,0,0,0.35);
     display: flex;
     flex-direction: column;
-    min-height: 520px;
+    height: 520px;
     max-height: 90vh;
     position: relative;
   }
@@ -403,7 +404,7 @@
     display: flex;
     flex-direction: column;
     gap: 6px;
-    min-height: 180px;
+    min-height: 0;
   }
 
   .message-row {
