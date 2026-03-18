@@ -584,12 +584,35 @@
     border: 1.5px solid #f0c6e4;
     border-radius: 18px;
     padding: 28px 28px 24px;
-    width: min(360px, 85%);
-    max-height: 75vh;
+    width: min(480px, 90%);
+    max-height: 50vh;
     overflow-y: auto;
     position: relative;
     box-shadow: 0 10px 40px rgba(0,0,0,0.1);
     animation: pop 0.2s ease;
+  }
+
+  .popup-scroll {
+    max-height: 300px;
+    overflow-y: scroll;
+    padding-right: 6px;
+    scrollbar-width: thin; /* for Firefox */
+    scrollbar-color: #f0c6e4 #f9eef5; /* for Firefox */
+  } 
+
+  .popup-scroll::-webkit-scrollbar {
+    width: 6px;
+  }
+  .popup-scroll::-webkit-scrollbar-track {
+    background: #f9eef5;
+    border-radius: 10px;
+  }
+  .popup-scroll::-webkit-scrollbar-thumb {
+    background: #f0c6e4;
+    border-radius: 10px;
+  }
+  .popup-scroll::-webkit-scrollbar-thumb:hover {
+    background: #c46ea0;
   }
 
   .popup-close {
