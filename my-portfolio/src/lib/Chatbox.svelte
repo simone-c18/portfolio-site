@@ -17,7 +17,7 @@
     step1: {
       bot: "i'm simone! i'm currently a junior at ucf studying computer science :3 i'm an aspiring full stack developer and my dream job is to be a SWE at pinterest 📌 i currently work as a contract software engineer at lockheed martin, and outside of classes and work i'm a workshop director for ucf's girl's who code loop! \n if you want to read more about me, click the hamburger bar in the top right!",
       options: [
-        { label: "can i see your resume?", next: "resume" },
+        { label: "nice to meet you!", next: "step2" },
         { label: "cool! i'm gonna look around a bit..", next: "step2" }
       ]
     },
@@ -28,7 +28,7 @@
         { label: "why do you enjoy fullstack development?", next: "enjoy" }, 
         { label: "can i see your resume?", next: "resume" },
         { label: "what type of music are you into?", next: "music" },
-        { label: "i gtg", next: "end" }
+        { label: "i gtg :(", next: "end" }
       ]
     },
     enjoy: {
@@ -62,7 +62,7 @@
       ]
     },
     end: {
-      bot: "aw, it was fun to talking with you! reach out to me via linkedin or email if you'd like to keep the convo going :3",
+      bot: "aw, it was fun talking with you! reach out to me via linkedin or email if you'd like to keep the convo going ദ്ദി(ᵔᗜᵔ)",
       link: { text: "linkedin", href: "https://www.linkedin.com/in/simone-chrastek/" },
       options: null
     }
@@ -125,6 +125,14 @@
     return new Promise(r => setTimeout(r, ms));
   }
 
+  function resetChat() {
+    messages = [];
+    currentStep = 'step0';
+    waitingForReply = false;
+    isTyping = false;
+    startChat();
+  }
+
   const pages = [
     {
       id: 'experience',
@@ -139,7 +147,7 @@
       id: 'projects',
       label: '🔌 projects',
       sections: [
-        { heading: 'girls who code website', href: 'https://github.com/simone-c18/GWC_WebDev', items: 'designed figma & leading web dev team to build club website using node.js + tailwind' },
+        { heading: 'girls who code website', href: 'https://github.com/simone-c18/GWC_WebDev', items: 'designed figma & lead web dev team to build club website using node.js, react + tailwind' },
         { heading: 'ecosorter', items: 'developed REST api endpoints using express for user auth and data retrieval', href: 'https://github.com/mariamauco/Fall2025WEECSLarge' },
         { heading: 'mealminder', items: 'ai powered ingredient tracker + recipe generator; developed UI using react + tailwind ', href: 'https://github.com/izzyaustt/MealMinder' },
         { heading: 'codecade', items: 'competed in knighthacks project showcase; built and designed UI + implemented JS logic handling', href: 'https://github.com/Kat-Gumerov/LearningBehindTheScreens' },
@@ -177,9 +185,15 @@
 
   onMount(() => startChat());
 
+  // $: currentOptions = waitingForReply && !isTyping && script[currentStep]
+  //   ? script[currentStep].options
+  //   : null;
+  // keep these separate
   $: currentOptions = waitingForReply && !isTyping && script[currentStep]
     ? script[currentStep].options
     : null;
+
+  $: console.log('currentStep:', currentStep, '| waitingForReply:', waitingForReply, '| isTyping:', isTyping);
 </script>
 
 <div class="wrapper">
@@ -269,7 +283,7 @@
               {#if myAvatar}
                 <img src={myAvatar} alt="me" />
               {:else}
-                <span>🐻</span>
+                <span>🍓</span>
               {/if}
             </div>
           {/if}
@@ -284,16 +298,18 @@
     </div>
 
     <!-- Reply options -->
-    {#if currentOptions}
-      <div class="options">
-        {#each currentOptions as opt}
-          <button class="option-btn" on:click={() => choose(opt)}>{opt.label}</button>
-        {/each}
-      </div>
-    {:else if !waitingForReply && !script[currentStep]?.options}
-      <div class="options end-msg">conversation ended 💌</div>
-    {/if}
-
+      {#if currentOptions}
+        <div class="options">
+          {#each currentOptions as opt}
+            <button class="option-btn" on:click={() => choose(opt)}>{opt.label}</button>
+          {/each}
+        </div>
+      {:else if waitingForReply && !isTyping && currentStep === 'end'}
+        <div class="options end-msg">
+          <p>conversation ended 💌</p>
+          <button class="btn-reset" on:click={resetChat}>start over?</button>
+        </div>
+      {/if}
   </div>
 </div>
 
@@ -709,6 +725,23 @@
   .options {
     padding: 10px 14px 16px;
   }
+}
+
+.btn-reset {
+  background: none;
+  border: 1.5px solid #f0c6e4;
+  border-radius: 22px;
+  padding: 8px 20px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  color: #c46ea0;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+  margin-top: 4px;
+}
+.btn-reset:hover {
+  background: #fce4f3;
+  transform: scale(1.02);
 }
 
 </style>
