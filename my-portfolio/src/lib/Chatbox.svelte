@@ -129,9 +129,9 @@
       id: 'experience',
       label: '💼 experience',
       sections: [
-        { heading: 'contract software engineer', items: 'contract software engineer — present' },
-        { heading: 'workshop director', items: 'workshop director — present' },
-        { heading: 'college mentor', items: 'girls who code' },
+        { heading: 'contract software engineer | lockheed martin', items: 'simulation + training for f35; worked with linux vms and c++ legacy codebase in agile environment' },
+        { heading: 'workshop director | girls who code ucf', items: 'planned and developed technical + behavioral workshops for gwc ucf :)' },
+        { heading: 'college mentor | girls who code', items: 'participated in networking and career building events for highschool mentees' },
       ]
     },
     {
